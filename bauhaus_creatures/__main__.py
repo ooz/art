@@ -72,7 +72,7 @@ CREATURE_DIM = 3
 TILES_PER_CREATURE = CREATURE_DIM * CREATURE_DIM
 class Algo(object):
     def __init__(self, repo):
-        super(Algo, self).__init__()
+        super().__init__()
         self.repo = repo
 
     def creature(self):
@@ -117,12 +117,12 @@ class Algo(object):
 
 class Creature(object):
     def __init__(self, tile_positions):
-        super(Creature, self).__init__()
+        super().__init__()
         self._tile_positions = tile_positions
-        self.tilesize = tile_positions.values()[0].image.size[0]
+        self.tilesize = list(tile_positions.values())[0].image.size[0]
 
     def _offsets(self, position, tilesize):
-        return ((position % 3) * tilesize, (position / 3) * tilesize)
+        return [(position % 3) * tilesize, (position // 3) * tilesize]
 
     def render(self, pad=0):
         tilesize = self.tilesize
@@ -135,22 +135,19 @@ class Creature(object):
 
 class Tile(object):
     def __init__(self, filepath):
-        super(Tile, self).__init__()
-        parts = filepath.split("/")[-1].split(".")[0].split("_")
+        super().__init__()
+        parts = filepath.split('/')[-1].split('.')[0].split('_')
         self.name = parts[0]
         self.image = Image.open(filepath)
         self.connectors = set(parts[1])
 
-    def __unicode__(self):
-        return u"%s(%s)" % (self.name, "".join(self.connectors))
-
     def __str__(self):
-        return unicode(self)
+        return '%s(%s)' % (self.name, ''.join(self.connectors))
 
 
 class TileRepository(object):
     def __init__(self, location):
-        super(TileRepository, self).__init__()
+        super().__init__()
         tile_files = []
         for (dirpath, dirnames, filenames) in os.walk(location):
             tile_files.extend([dirpath + fn for fn in filenames])
@@ -172,10 +169,10 @@ class TileRepository(object):
 
 
 def main(args):
-    tile_repo = TileRepository("tiles/")
+    tile_repo = TileRepository('tiles/')
     for pos in range(9):
         print(valid_moves(pos))
-    print tile_repo.tilesize()
+    print(tile_repo.tilesize())
     algo = Algo(tile_repo)
     img = algo.render(args.dimension, args.padding)
     img.save(args.output)
