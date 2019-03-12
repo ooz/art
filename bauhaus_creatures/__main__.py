@@ -126,12 +126,14 @@ class Creature(object):
 
     def render(self, pad=0):
         tilesize = self.tilesize
-        img = Image.new('RGBA', (3 * tilesize + 2 * pad, 3 * tilesize + 2 * pad))
+        imgsize = (3 * tilesize + 2 * pad, 3 * tilesize + 2 * pad)
+        img = Image.new('RGBA', imgsize)
         for pos, tile in self._tile_positions.items():
             tilesize = tile.image.size[0]
             offsets = [offset + pad for offset in self._offsets(pos, tilesize)]
             img.paste(tile.image, offsets)
-        return img
+        background = Image.new('RGBA', imgsize, (255, 255, 255, 255)) # white background color
+        return Image.alpha_composite(background, img)
 
 class Tile(object):
     def __init__(self, filepath):
