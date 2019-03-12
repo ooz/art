@@ -151,7 +151,7 @@ class TileRepository(object):
     def __init__(self, location):
         super().__init__()
         tile_files = []
-        for (dirpath, dirnames, filenames) in os.walk(location):
+        for (dirpath, _, filenames) in os.walk(location):
             tile_files.extend([dirpath + fn for fn in filenames])
             break
         self.tiles = [Tile(filepath) for filepath in tile_files]
