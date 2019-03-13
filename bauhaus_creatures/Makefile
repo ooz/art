@@ -1,5 +1,5 @@
 all:
-	pipenv run python3 ./ --padding 8
+	pipenv run python3 ./
 
 clean:
 	rm -f *.png
