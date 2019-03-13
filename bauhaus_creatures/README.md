@@ -2,7 +2,7 @@
 
 *Generates creatures with maximum dimension of 3x3 from square, circle and triangle primitives.*
 
-![Bauhaus Creatures made from squares, circles and triangles](32x16x1552516276.png)
+![Bauhaus Creatures made from squares, circles and triangles](examples/32x16x1552516276.png)
 
 Primitives are connected to creatures by the following constraints:
 
