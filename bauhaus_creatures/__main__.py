@@ -57,16 +57,15 @@ MOVEMENTS = {
         "8n": 5,
         "8w": 7
 }
+FLIP = {
+    'n': 's',
+    's': 'n',
+    'e': 'w',
+    'w': 'e'
+}
 
 def valid_moves(position):
     return sorted([direction[1] for direction in MOVEMENTS.keys() if int(direction[0]) == position])
-
-def valid_constrained_moves(position, last_pos):
-    return [move[1] for move in MOVEMENTS.keys() if move.startswith(str(last_pos)) and MOVEMENTS[move] == position]
-
-
-def next(position, directions):
-    return set([MOVEMENTS[key] for key in [str(position) + dr for dr in directions if str(position) + dr in MOVEMENTS]])
 
 CREATURE_DIM = 3
 TILES_PER_CREATURE = CREATURE_DIM * CREATURE_DIM
@@ -76,32 +75,38 @@ class Algo(object):
         self.repo = repo
 
     def creature(self):
-        stack = set()
-        last_pos = -1
-        position = 4 #random.choice(range(TILES_PER_CREATURE))
         tile_positions = {}
-        tile_count = 0
+
+        position = random.choice(range(TILES_PER_CREATURE))
+        origin = '?'
+        stack = { (position, origin) }
         while True:
-            moves = valid_moves(position)
-            if last_pos != -1:
-                moves = valid_constrained_moves(position, last_pos)
-            possible_tiles = self.repo.all_tiles_supporting(moves)
-            if not possible_tiles and not stack:
+            if not stack:
                 break
-            tile = None
+
+            next_step = random.choice(list(stack))
+            stack.discard(next_step)
+            position = int(next_step[0])
+            origin = str(next_step[1])
+            possible_moves = valid_moves(position)
+
+            possible_tiles = self.repo.all_tiles_supporting(possible_moves)
+            if origin != '?':
+                possible_tiles = [tile for tile in possible_tiles if origin in tile.connectors]
+
             if possible_tiles:
                 tile = random.choice(possible_tiles)
                 tile_positions[position] = tile
-                tile_count += 1
+
+                to_push = [(MOVEMENTS[str(position) + connector], FLIP[connector]) for connector in tile.connectors if str(str(position) + connector) in MOVEMENTS]
+                to_push = set([next_entry for next_entry in to_push if next_entry[0] not in tile_positions.keys()])
+                stack |= to_push
+
             # if rand() < (#leftoverspots / #totalspots) -> continue
-            if tile_count >= 3 and (random.random() >= ((TILES_PER_CREATURE - len(tile_positions.keys())) / float(TILES_PER_CREATURE))):
+            tile_count = len(tile_positions.keys())
+            if tile_count >= 3 and (random.random() >= ((TILES_PER_CREATURE - tile_count) / float(TILES_PER_CREATURE))):
                 break
-            if tile:
-                stack |= next(position, tile.connectors)
-            if stack:
-                last_pos = position
-                position = random.choice(list(stack))
-                stack.discard(position)
+
         return Creature(tile_positions)
 
     def render(self, size, pad=0):
@@ -146,7 +151,6 @@ class Tile(object):
     def __str__(self):
         return '%s(%s)' % (self.name, ''.join(self.connectors))
 
-
 class TileRepository(object):
     def __init__(self, location):
         super().__init__()
@@ -155,8 +159,6 @@ class TileRepository(object):
             tile_files.extend([dirpath + fn for fn in filenames])
             break
         self.tiles = [Tile(filepath) for filepath in tile_files]
-        for tile in self.tiles:
-            print(tile)
 
     def tilesize(self):
         return self.tiles[0].image.size[0]
@@ -172,9 +174,6 @@ class TileRepository(object):
 
 def main(args):
     tile_repo = TileRepository('tiles/')
-    for pos in range(9):
-        print(valid_moves(pos))
-    print(tile_repo.tilesize())
     algo = Algo(tile_repo)
     img = algo.render(args.dimension, args.padding)
     img.save(args.output)
@@ -186,13 +185,13 @@ if __name__ == "__main__":
                         action="store_true", default=False,
                         help="Verbose output.")
     parser.add_argument("-d", "--dimension",
-                        type=str, default="35x17",
+                        type=str, default="32x16",
                         help="Size of the image in creatures (each creatures is 3x3 tiles large).")
     parser.add_argument("-o", "--output",
                         type=str, default=None,
                         help="Output filename. Default: <width>x<height>x<seed>.")
     parser.add_argument("-p", "--padding",
-                        type=int, default=0,
+                        type=int, default=16,
                         help="Pads each creature with this amount of pixels in every direction.")
     parser.add_argument("-s", "--seed",
                         type=int, default=None,
