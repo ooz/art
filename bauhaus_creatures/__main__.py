@@ -70,21 +70,22 @@ def valid_moves(position):
 CREATURE_DIM = 3
 TILES_PER_CREATURE = CREATURE_DIM * CREATURE_DIM
 class Algo(object):
-    def __init__(self, repo):
+    def __init__(self, repo, args):
         super().__init__()
         self.repo = repo
+        self.rng = RNG(args)
 
     def creature(self):
         tile_positions = {}
 
-        position = random.choice(range(TILES_PER_CREATURE))
+        position = self.rng.choice(range(TILES_PER_CREATURE))
         origin = '?'
         stack = { (position, origin) }
         while True:
             if not stack:
                 break
 
-            next_step = random.choice(list(stack))
+            next_step = self.rng.choice(list(stack))
             stack.discard(next_step)
             position = int(next_step[0])
             origin = str(next_step[1])
@@ -95,7 +96,7 @@ class Algo(object):
                 possible_tiles = [tile for tile in possible_tiles if origin in tile.connectors]
 
             if possible_tiles:
-                tile = random.choice(possible_tiles)
+                tile = self.rng.choice(possible_tiles)
                 tile_positions[position] = tile
 
                 to_push = [(MOVEMENTS[str(position) + connector], FLIP[connector]) for connector in tile.connectors if str(str(position) + connector) in MOVEMENTS]
@@ -104,12 +105,14 @@ class Algo(object):
 
             # if rand() < (#leftoverspots / #totalspots) -> continue
             tile_count = len(tile_positions.keys())
-            if tile_count >= 3 and (random.random() >= ((TILES_PER_CREATURE - tile_count) / float(TILES_PER_CREATURE))):
+            if tile_count >= 3 and (self.rng.random() >= ((TILES_PER_CREATURE - tile_count) / float(TILES_PER_CREATURE))):
                 break
 
         return Creature(tile_positions)
 
-    def render(self, size, pad=0):
+    def render(self, args):
+        size = args.dimension
+        pad = args.padding
         tilesize = self.repo.tilesize()
         creature_size = CREATURE_DIM * tilesize + 2 * pad
         size_px = tuple([creature_size * dim for dim in size])
@@ -119,6 +122,23 @@ class Algo(object):
                 creature = self.creature()
                 img.paste(creature.render(pad), (x * creature_size, y * creature_size))
         return img
+
+MAX_COUNT_OF_RNG_NUMBERS_NEEDED_PER_CREATURE = 20
+class RNG(object):
+    def __init__(self, args):
+        super().__init__()
+        self.values = range(args.dimension[0] * args.dimension[1] * MAX_COUNT_OF_RNG_NUMBERS_NEEDED_PER_CREATURE)
+        self.rng = random.Random(args.seed)
+        self.values = [self.rng.random() for _ in self.values]
+        self.values = iter(self.values)
+
+    def choice(self, seq):
+        random_index = int(next(self.values) * len(seq))
+        return seq[random_index]
+
+    def random(self):
+        value = next(self.values)
+        return value
 
 class Creature(object):
     def __init__(self, tile_positions):
@@ -174,16 +194,13 @@ class TileRepository(object):
 
 def main(args):
     tile_repo = TileRepository('tiles/')
-    algo = Algo(tile_repo)
-    img = algo.render(args.dimension, args.padding)
+    algo = Algo(tile_repo, args)
+    img = algo.render(args)
     img.save(args.output)
 
 
 if __name__ == "__main__":
     parser = AP.ArgumentParser(description="Greeter program.")
-    parser.add_argument("-v", "--verbose",
-                        action="store_true", default=False,
-                        help="Verbose output.")
     parser.add_argument("-d", "--dimension",
                         type=str, default="32x16",
                         help="Size of the image in creatures (each creatures is 3x3 tiles large).")
@@ -204,6 +221,5 @@ if __name__ == "__main__":
     if args.output is None:
         args.output = args.dimension + "x" + str(args.seed) + ".png"
     args.dimension = [int(dim) for dim in args.dimension.split("x")]
-    random.seed(args.seed)
 
     main(args)

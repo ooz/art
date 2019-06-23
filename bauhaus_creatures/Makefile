@@ -1,5 +1,5 @@
 all:
-	pipenv run python3 ./
+	PYTHONHASHSEED=1 pipenv run python3 ./
 
 init:
 	pipenv install
