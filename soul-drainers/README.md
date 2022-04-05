@@ -2,8 +2,6 @@
 
 *Random people in public places, so absorbed by their smartphones, that they might as well were elsewhere.*
 
-For all photos, I first observed the scene, noticed the absurdity and then started taking out the phone and taking a photo.
-
 ![Just the dog noticed me, notice laughing ad people](bus_waiting_beamed.jpg)
 ![Happens](bus_beamed0.jpg)
 ![](bus_beamed1.jpg)
