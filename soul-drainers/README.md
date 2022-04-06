@@ -15,6 +15,7 @@ date: 2022-04-05T12:15:00Z
 ![Honest ad](fb_no_value.jpg)
 
 For all photos, I first observed the scene, noticed the absurdity and then started taking out the phone and taking a photo.
+Photos are from 2017 to 2019.
 None of the people pictured were asked for photo permission, hence the heavy censor.
 If you think, there's an error, please write an email to the address in the [about section](https://oliz.io/about.html) of this website.
 
