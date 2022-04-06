@@ -1,4 +1,7 @@
-# Soul Drainers
+---
+title: Soul Drainers
+date: 2022-04-05T12:15:00Z
+---
 
 *Random people in public places, so absorbed by their smartphones, that they might as well were elsewhere.*
 
